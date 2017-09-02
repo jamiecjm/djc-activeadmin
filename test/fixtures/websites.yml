@@ -1,0 +1,27 @@
+# == Schema Information
+#
+# Table name: websites
+#
+#  id              :integer          not null, primary key
+#  subdomain       :string
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  superteam_name  :string
+#  logo            :string
+#  external_host   :string
+#  email           :string
+#  password        :string
+#  password_digest :string
+#
+
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# This model initially had no columns defined. If you add columns to the
+# model remove the '{}' from the fixture names and add the columns immediately
+# below each fixture, per the syntax in the comments below
+#
+one: {}
+# column: value
+#
+two: {}
+# column: value
