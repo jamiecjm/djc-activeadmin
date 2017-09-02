@@ -12,7 +12,7 @@ ActiveAdmin.register Salevalue do
 #   permitted
 # end
 
-	menu parent: 'Sale'
+	menu parent: 'Sale', label: 'Individual'
 
 	index title: 'Individual Sales' do
 	    selectable_column
@@ -32,18 +32,10 @@ ActiveAdmin.register Salevalue do
 	    column :buyer, sortable: 'sales.buyer' do |sv|
 	    	sv.sale.buyer
 	    end
-	    column 'REN SalePercentage (%)', sortable: :percentage do |sv|
-	    	sv.percentage
-	    end
-	    column 'REN SPA Value (RM)', sortable: :spa do |sv|
-	    	sv.spa
-	    end
-	    column 'REN Nett Value (RM)', sortable: :nett_value do |sv|
-	    	sv.nett_value
-	    end
-	    column 'REN Commission (RM)', sortable: :comm do |sv|
-	    	sv.comm
-	    end
+	    column 'REN SalePercentage (%)',:percentage
+	    column 'REN SPA Value (RM)', :spa
+	    column 'REN Nett Value (RM)', :nett_value
+	    column 'REN Commission (RM)', :comm
 	    column 'Unit Size (sqft)', sortable: 'units.size' do |sv|
 	    	sv.unit.size
 	    end

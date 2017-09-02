@@ -18,6 +18,7 @@
 class Team < ApplicationRecord
 	has_many :users
 	belongs_to :leader, optional: true, :class_name => "User"
+  has_many :sales, through: :users
 	has_ancestry
 	validates :leader_id, uniqueness: :true
 

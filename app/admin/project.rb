@@ -12,6 +12,7 @@ ActiveAdmin.register Project do
 #   permitted
 # end
 
+	menu parent: 'Project', label: 'List'
 end
 
 # == Schema Information

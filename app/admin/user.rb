@@ -1,7 +1,10 @@
 ActiveAdmin.register User do
+
+  menu parent: 'Team', label: 'Members'
+
   permit_params :email, :password, :password_confirmation
 
-  index do
+  index title: 'Members' do
     selectable_column
     id_column
     column :email
@@ -23,6 +26,21 @@ ActiveAdmin.register User do
       f.input :password_confirmation
     end
     f.actions
+  end
+
+  controller do
+    def scoped_collection
+      if params['q'] == nil
+        if current_user.leader?
+          super.includes(:teams).where('teams.id': current_user.team.subtree.pluck(:id))
+        else
+          super.where(id: current_user.subtree.pluck(:id))
+        end
+      else
+        super
+      end
+        # prevents N+1 queries to your database
+    end
   end
 
 end

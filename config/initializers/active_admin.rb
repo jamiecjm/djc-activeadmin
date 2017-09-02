@@ -226,6 +226,13 @@ ActiveAdmin.setup do |config|
   #
     config.namespace nil do |admin|
       admin.build_menu :default do |menu|
+        menu.add label: 'Sale', priority: 0 do |s|
+          s.add label: 'New', url: '/sales/new', priority: 0
+        end
+        menu.add label: 'Team', priority: 1
+        menu.add label: 'Project', priority: 2 do |p|
+          p.add label: 'New', url: '/projects/new', priority: 0
+        end
       end
     end
 
@@ -281,7 +288,7 @@ ActiveAdmin.setup do |config|
   # By default, the footer shows the current Active Admin version. You can
   # override the content of the footer here.
   #
-  # config.footer = 'my custom footer text'
+  config.footer = 'Powered by DJC Venture'
 
   # == Sorting
   #

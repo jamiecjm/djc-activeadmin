@@ -122,10 +122,6 @@ class User < ApplicationRecord
     end
   end
 
-  def admin?
-    self.admin
-  end
-
   def subtree_members
     if self.leader?
       return self.team.sub_tree_members

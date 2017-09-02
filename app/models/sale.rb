@@ -30,6 +30,7 @@ class Sale < ApplicationRecord
   belongs_to :project, optional: true
   belongs_to :commission, optional: true
   belongs_to :unit, optional: true, :dependent => :destroy
+  has_many :teams, through: :users
   has_many :salevalues, :dependent => :destroy
   has_many :salevalues2, class_name: "Salevalue", :dependent => :destroy
 
