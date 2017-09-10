@@ -229,7 +229,8 @@ ActiveAdmin.setup do |config|
         menu.add label: 'Sale', priority: 0 do |s|
           s.add label: 'New', url: '/sales/new', priority: 0
         end
-        menu.add label: 'Team', priority: 1
+        menu.add label: 'Team', priority: 1 do |t|
+        end
         menu.add label: 'Project', priority: 2 do |p|
           p.add label: 'New', url: '/projects/new', priority: 0
         end

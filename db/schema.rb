@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170830102430) do
+ActiveRecord::Schema.define(version: 20170902075642) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,14 +49,20 @@ ActiveRecord::Schema.define(version: 20170830102430) do
     t.string   "buyer"
     t.integer  "project_id"
     t.integer  "unit_id"
-    t.integer  "status",        default: 0
+    t.integer  "status",          default: 0
     t.string   "package"
     t.string   "remark"
     t.date     "spa_sign_date"
     t.date     "la_date"
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
     t.integer  "commission_id"
+    t.string   "unit_no"
+    t.integer  "size"
+    t.float    "nett_price"
+    t.float    "spa_price"
+    t.float    "comm"
+    t.float    "comm_percentage"
     t.index ["commission_id"], name: "index_sales_on_commission_id", using: :btree
     t.index ["date"], name: "index_sales_on_date", using: :btree
     t.index ["project_id"], name: "index_sales_on_project_id", using: :btree

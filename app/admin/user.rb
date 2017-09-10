@@ -32,7 +32,7 @@ ActiveAdmin.register User do
     def scoped_collection
       if params['q'] == nil
         if current_user.leader?
-          super.includes(:teams).where('teams.id': current_user.team.subtree.pluck(:id))
+          super.includes(:team).where('teams.id': current_user.team.subtree.pluck(:id))
         else
           super.where(id: current_user.subtree.pluck(:id))
         end

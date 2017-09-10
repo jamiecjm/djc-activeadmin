@@ -13,6 +13,26 @@ ActiveAdmin.register Project do
 # end
 
 	menu parent: 'Project', label: 'List'
+
+	index do
+		column :id
+		column :name
+		1.times do
+			max_comm = projects.map(&:commissions).map(&:length).max
+			(1..max_comm).each do |x|
+				column "Commission #{x} (Effective Date)" do |project|
+					comm = project.commissions[x-1]
+					if comm
+						"#{comm.percentage}% (#{comm.effective_date})"
+					else
+						'-'
+					end
+				end
+			end
+		end
+		actions
+	end
+
 end
 
 # == Schema Information

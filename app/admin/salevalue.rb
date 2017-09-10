@@ -32,18 +32,26 @@ ActiveAdmin.register Salevalue do
 	    column :buyer, sortable: 'sales.buyer' do |sv|
 	    	sv.sale.buyer
 	    end
-	    column 'REN SalePercentage (%)',:percentage
-	    column 'REN SPA Value (RM)', :spa
-	    column 'REN Nett Value (RM)', :nett_value
-	    column 'REN Commission (RM)', :comm
+	    column 'REN SalePercentage (%)',sortable: :percentage do |sv|
+	    	number_with_delimiter('%.2f' % sv.percentage)
+	    end
+	    column 'REN SPA Value (RM)',sortable: :spa do |sv|
+	    	number_with_delimiter('%.2f' % sv.spa)
+		end	
+	    column 'REN Nett Value (RM)', sortable: :nett_value do |sv|
+	    	number_with_delimiter('%.2f' % sv.nett_value)
+	    end
+	    column 'REN Commission (RM)', sortable: :comm do |sv|
+	    	number_with_delimiter('%.2f' % sv.comm)
+	    end
 	    column 'Unit Size (sqft)', sortable: 'units.size' do |sv|
 	    	sv.unit.size
 	    end
 	    column 'Unit SPA Value (RM)', sortable: 'units.spa_price' do |sv|
-	    	sv.unit.spa_price
+	    	number_with_delimiter('%.2f' % sv.unit.spa_price)
 	    end
 	    column 'Unit Nett Value (RM)', sortable: 'units.nett_price' do |sv|
-	    	sv.unit.nett_price
+	    	number_with_delimiter('%.2f' % sv.unit.nett_price)
 	    end
 	    actions
 	end

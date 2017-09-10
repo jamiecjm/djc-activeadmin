@@ -2,19 +2,25 @@
 #
 # Table name: sales
 #
-#  id            :integer          not null, primary key
-#  date          :date
-#  buyer         :string
-#  project_id    :integer
-#  unit_id       :integer
-#  status        :integer          default("Booked")
-#  package       :string
-#  remark        :string
-#  spa_sign_date :date
-#  la_date       :date
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
-#  commission_id :integer
+#  id              :integer          not null, primary key
+#  date            :date
+#  buyer           :string
+#  project_id      :integer
+#  unit_id         :integer
+#  status          :integer          default("Booked")
+#  package         :string
+#  remark          :string
+#  spa_sign_date   :date
+#  la_date         :date
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  commission_id   :integer
+#  unit_no         :string
+#  size            :integer
+#  nett_price      :float
+#  spa_price       :float
+#  comm            :float
+#  comm_percentage :float
 #
 # Indexes
 #
@@ -29,7 +35,7 @@ class Sale < ApplicationRecord
   has_many :users, :through => :salevalues
   belongs_to :project, optional: true
   belongs_to :commission, optional: true
-  belongs_to :unit, optional: true, :dependent => :destroy
+  belongs_to :unit, optional:true, :dependent => :destroy
   has_many :teams, through: :users
   has_many :salevalues, :dependent => :destroy
   has_many :salevalues2, class_name: "Salevalue", :dependent => :destroy

@@ -36,6 +36,11 @@ GEM
       ransack (~> 1.3)
       sass (~> 3.1)
       sprockets (< 4.1)
+    activeadmin_addons (1.0.0)
+      railties
+      require_all
+      select2-rails (~> 4.0)
+      xdan-datetimepicker-rails (~> 2.5.1)
     activejob (5.0.5)
       activesupport (= 5.0.5)
       globalid (>= 0.3.6)
@@ -191,6 +196,7 @@ GEM
     rb-fsevent (0.10.2)
     rb-inotify (0.9.10)
       ffi (>= 0.5.0, < 2)
+    require_all (1.4.0)
     responders (2.4.0)
       actionpack (>= 4.2.0, < 5.3)
       railties (>= 4.2.0, < 5.3)
@@ -205,6 +211,8 @@ GEM
       sprockets (>= 2.8, < 4.0)
       sprockets-rails (>= 2.0, < 4.0)
       tilt (>= 1.1, < 3)
+    select2-rails (4.0.3)
+      thor (~> 0.14)
     spring (2.0.2)
       activesupport (>= 4.2)
     spring-watcher-listen (2.0.1)
@@ -240,12 +248,16 @@ GEM
     websocket-driver (0.6.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.2)
+    xdan-datetimepicker-rails (2.5.4)
+      jquery-rails
+      rails (>= 3.2.16)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   activeadmin
+  activeadmin_addons
   ancestry
   annotate
   byebug
@@ -272,4 +284,4 @@ DEPENDENCIES
   web-console (>= 3.3.0)
 
 BUNDLED WITH
-   1.15.3
+   1.15.4
