@@ -58,15 +58,14 @@ ActiveAdmin.register Salevalue do
 
 	controller do
 		def scoped_collection
-			if params['q'] == nil
-	        	super.where(:user_id => current_user.id).includes(:project,:unit)
-	        else
-	        	super.includes(:project,:unit)
-	        end
-		    # prevents N+1 queries to your database
+			super.includes(:project,:unit)
 		end
 
 	end
+
+	filter :user, label: 'REN', :collection => proc {current_user.team_members.order('prefered_name').map{|u| [u.prefered_name, u.id]}}
+	filter :project, :collection => Project.all.order('name')
+	filter :date
 
 end
 
@@ -83,6 +82,7 @@ end
 #  sale_id    :integer
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
+#  other_user :string
 #
 # Indexes
 #

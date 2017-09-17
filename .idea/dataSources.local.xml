@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="Rails aa-djcsystem: development" uuid="4f625d6f-a431-4c5c-b816-8e7fa344eb72">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" />
+      <first-sync>true</first-sync>
+    </data-source>
+    <data-source name="Rails aa-djcsystem: production" uuid="eb561c44-6fc2-487f-8d0f-d872da625edb">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" />
+      <first-sync>true</first-sync>
+      <user-name>aa-djcsystem</user-name>
+    </data-source>
+    <data-source name="Rails aa-djcsystem: test" uuid="a8f57d4a-6a9f-49f6-b8de-eeebcbe81ae6">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" />
+      <first-sync>true</first-sync>
+    </data-source>
+  </component>
+</project>

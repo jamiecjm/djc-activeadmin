@@ -10,7 +10,6 @@
 
 class Project < ApplicationRecord
 	has_many :sales
-	has_many :units
 	has_many :commissions, dependent: :destroy
 
 	validates :name, uniqueness:{ message: "already existed"}

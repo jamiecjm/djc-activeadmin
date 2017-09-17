@@ -31,14 +31,14 @@
 #
 
 class Sale < ApplicationRecord
-  
+
   has_many :users, :through => :salevalues
   belongs_to :project, optional: true
   belongs_to :commission, optional: true
   belongs_to :unit, optional:true, :dependent => :destroy
   has_many :teams, through: :users
-  has_many :salevalues, :dependent => :destroy
-  has_many :salevalues2, class_name: "Salevalue", :dependent => :destroy
+  has_many :salevalues, -> {team}, :dependent => :destroy
+  has_many :salevalues2, -> {other_team}, class_name: "Salevalue", :dependent => :destroy
 
   after_create :after_save_action, :unless => :skip_callback
   before_validation :set_commission_id, :unless => :skip_callback
@@ -73,14 +73,14 @@ class Sale < ApplicationRecord
     self.where(status: ["Done","Booked"]).count
   end
 
-  def calculate   
+  def calculate
     comm = self.commission
     unit = self.unit
     unit.update(sale_id: self.id,project_id: self.project_id,comm: comm.percentage/100*unit.nett_price*0.94,comm_percentage: comm.percentage)
     self.salevalues.each do |sv|
       sv.recalculate(unit)
       # sv.user.recalculate
-    end 
+    end
   end
 
   def after_save_action
@@ -92,7 +92,7 @@ class Sale < ApplicationRecord
   def set_commission_id
     commission = self.project.commission(self.date)
     if commission.present?
-      self.commission_id = commission.id 
+      self.commission_id = commission.id
     else
       self.commission_id = nil
     end

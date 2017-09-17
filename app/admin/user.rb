@@ -2,14 +2,24 @@ ActiveAdmin.register User do
 
   menu parent: 'Team', label: 'Members'
 
-  permit_params :email, :password, :password_confirmation
+  permit_params :email, :password, :password_confirmation, :name, :prefered_name, :phone_no, :birthday, :parent_id,
+                :location
 
   index title: 'Members' do
     selectable_column
     id_column
+    column 'Full Name', :name
+    column :prefered_name
+    column 'Referrer' do |user|
+      user.parent.prefered_name
+    end
+    column 'Leader' do |user|
+      user.team.leader.prefered_name
+    end
+    column :location
+    column :phone_no
     column :email
-    column :current_sign_in_at
-    column :sign_in_count
+    column :birthday
     column :created_at
     actions
   end
@@ -21,26 +31,17 @@ ActiveAdmin.register User do
 
   form do |f|
     f.inputs do
+      f.input :name
+      f.input :prefered_name
+      f.input :phone_no
       f.input :email
+      f.input :birthday
+      f.input :parent_id
+      f.input :location
       f.input :password
       f.input :password_confirmation
     end
     f.actions
-  end
-
-  controller do
-    def scoped_collection
-      if params['q'] == nil
-        if current_user.leader?
-          super.includes(:team).where('teams.id': current_user.team.subtree.pluck(:id))
-        else
-          super.where(id: current_user.subtree.pluck(:id))
-        end
-      else
-        super
-      end
-        # prevents N+1 queries to your database
-    end
   end
 
 end

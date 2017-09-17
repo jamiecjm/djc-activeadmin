@@ -14,6 +14,8 @@ ActiveAdmin.register Project do
 
 	menu parent: 'Project', label: 'List'
 
+  permit_params :name, commissions_attributes: [:effective_date, :percentage]
+
 	index do
 		column :id
 		column :name
@@ -31,7 +33,18 @@ ActiveAdmin.register Project do
 			end
 		end
 		actions
-	end
+  end
+
+  form do |f|
+    f.inputs do
+      f.input :name
+      f.has_many :commissions do |c|
+        c.input :effective_date
+        c.input :percentage
+      end
+    end
+    actions
+  end
 
 end
 

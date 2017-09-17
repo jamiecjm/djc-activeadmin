@@ -44,9 +44,13 @@ class User < ApplicationRecord
   
   attr_accessor :login
 
+  scope :with_team, -> {where.not(team_id: nil).order('prefered_name')}
+  scope :approved, -> {where(approved?: true).order('prefered_name')}
+
   has_many :sales, :through => :salevalues
   has_many :salevalues, dependent: :destroy
   belongs_to :team, optional: true
+  # has_one :leader, class_name: 'User', through: :team
 
   has_ancestry :orphan_strategy => :rootify
 
@@ -54,8 +58,8 @@ class User < ApplicationRecord
   before_validation :set_team
   
   validates_confirmation_of :password
-  validates :prefered_name, uniqueness: {message: "has been taken. Check with you leader whether you have an account."}, unless: Proc.new { |a| a.team_id.blank?}
-  validates :email, presence: true, unless: Proc.new {|a| a.team_id.blank?}
+  validates :prefered_name, uniqueness: {message: "has been taken. Check with you leader whether you have an account."}
+  validates :email, presence: true
 
   enum location: ["KL","JB","Penang","Melaka"]
   enum position: ["REN","Team Leader","Team Manager","admin"]
@@ -79,14 +83,6 @@ class User < ApplicationRecord
 
   def TotalSales
     self.sales.not_canceled.count
-  end
-
-  # def recalculate
-  #   self.update_columns(total_spa: self.TotalSPA,total_nett_value: self.TotalNetValue,total_comm: self.TotalComm,total_sales: self.TotalSales)
-  # end
-
-  def self.approved
-    self.where(approved?: true)
   end
 
   def leader
@@ -122,11 +118,11 @@ class User < ApplicationRecord
     end
   end
 
-  def subtree_members
+  def team_members
     if self.leader?
-      return self.team.sub_tree_members
+      User.where(team_id: self.team.subtree.pluck(:id))
     else
-      return self.subtree
+      User.where(id: self.subtree.pluck(:id))
     end
   end
 

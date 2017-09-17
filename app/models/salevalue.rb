@@ -11,6 +11,7 @@
 #  sale_id    :integer
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
+#  other_user :string
 #
 # Indexes
 #
@@ -19,6 +20,9 @@
 #
 
 class Salevalue < ApplicationRecord
+
+	scope :team, -> {where(other_user: nil)}
+	scope :other_team, -> {where.not(other_user: nil)}
 
 	belongs_to :user, optional: true
 	belongs_to :sale, optional: true

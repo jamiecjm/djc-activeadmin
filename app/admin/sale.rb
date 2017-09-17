@@ -14,18 +14,13 @@ ActiveAdmin.register Sale do
 
 	menu parent: 'Sale', label: 'Team'
 
+  permit_params :date, :project_id, :unit_no, :unit_size, :spa_price, :nett_price, :buyer, :size, :spa_sign_date, :la_date,
+                :package, :remark, salevalues_attributes: [:user_id, :percentage, :comm, :nett_value, :spa],
+                salevalues2_attributes: [:other_user, :percentage, :comm, :nett_value, :spa]
+
 	controller do
 		def scoped_collection
-			if params['q'] == nil
-				if current_user.leader?
-	        		super.includes(:users, :project,:commission,:teams,salevalues: :user).where('teams.id': current_user.team.subtree.pluck(:id))
-	        	else
-	        		super.includes(:users, :project,:commission,:teams,salevalues: :user).where('users.id': current_user.subtree.pluck(:id))
-	        	end
-	        else
-	        	super.includes(:project,:unit,:commission,:teams,:users, salevalues: :user)
-	        end
-		    # prevents N+1 queries to your database
+        super.includes(:project,:unit,:commission,:teams,:users, salevalues: :user)
 		end
 
 
@@ -42,19 +37,23 @@ ActiveAdmin.register Sale do
 		column 'Unit No.', :unit_no
 		column :buyer
 		1.times do
-			max_ren = sales.map(&:users).map(&:length).max
+			max_ren = (sales.map(&:salevalues).map(&:length)+sales.map(&:salevalues2).map(&:length)).max
 			(1..max_ren).each do |x|
 				column "REN #{x} (%)", sortable: 'users.name' do |sale|
-					sv = sale.salevalues[x-1]
-					if sv
-						"#{sv.user.prefered_name} (#{sv.percentage}%)"
+					sv = sale.salevalues
+					if sv[x-1]
+						"#{sv[x-1].user.prefered_name} (#{sv[x-1].percentage}%)"
+					elsif sv2 = sale.salevalues2[x-sv.length-1]
+						"#{sv2.other_user} (#{sv2.percentage}%)"
 					else
 						'-'
 					end
 				end
 			end
 		end
-		column 'Unit Size', :size
+		column 'Unit Size', sortable: :size do |sale|
+			number_with_delimiter(sale.size)
+		end
 		column 'SPA Value (RM)', sortable: :spa_price do |sale|
 			number_with_delimiter('%.2f' % sale.spa_price)
 		end
@@ -74,11 +73,11 @@ ActiveAdmin.register Sale do
 		f.inputs do
 			input :date
 			f.has_many :salevalues, heading: 'REN' do |sv|
-				sv.input :user, label: 'Name'
+				sv.input :user_id, :label => 'Name', :as => :select, :collection => User.with_team.order('prefered_name').map{|u| [u.prefered_name, u.id]}
 				sv.input :percentage
 			end
 			f.has_many :salevalues2, heading: 'Other REN' do |sv|
-				sv.input :user, label: 'Name'
+				sv.input :other_user, label: 'Name'
 				sv.input :percentage
 			end
 			input :project
@@ -89,10 +88,18 @@ ActiveAdmin.register Sale do
 			input :buyer
 			input :package
 			input :remark
-		end
+    end
+
+    f.inputs 'SPA and LA Sign Date' do
+      input :spa_sign_date
+      input :la_date
+    end
 		actions
 	end
 
+	filter :users, label: 'REN', :collection => proc {current_user.team_members.order('prefered_name').map{|u| [u.prefered_name, u.id]}}
+	filter :project, :collection => Project.all.order('name')
+	filter :date
 end
 
 # == Schema Information

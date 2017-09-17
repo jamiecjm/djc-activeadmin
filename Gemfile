@@ -62,3 +62,6 @@ gem 'rails_12factor', group: :production
 gem 'unicorn'
 gem 'local-subdomain'
 gem 'activeadmin_addons'
+gem 'figaro'
+gem 'sendgrid-ruby'
+gem 'cancancan'
