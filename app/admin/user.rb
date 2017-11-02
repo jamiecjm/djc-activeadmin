@@ -11,7 +11,7 @@ ActiveAdmin.register User do
     column 'Full Name', :name
     column :prefered_name
     column 'Referrer' do |user|
-      user.parent.prefered_name
+      user.parent&.prefered_name
     end
     column 'Leader' do |user|
       user.team.leader.prefered_name
@@ -43,6 +43,7 @@ ActiveAdmin.register User do
     end
     f.actions
   end
+
 
 end
 

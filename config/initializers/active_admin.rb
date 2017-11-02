@@ -199,7 +199,7 @@ ActiveAdmin.setup do |config|
   #   config.register_stylesheet 'my_print_stylesheet.css', media: :print
   #
   # To load a javascript file:
-  #   config.register_javascript 'my_javascript.js'
+    config.register_javascript 'sale.js'
 
   # == CSV options
   #
@@ -244,19 +244,19 @@ ActiveAdmin.setup do |config|
   #
   # To disable/customize for the :admin namespace:
   #
-  #   config.namespace :admin do |admin|
+    config.namespace nil do |admin|
   #
   #     # Disable the links entirely
   #     admin.download_links = false
   #
   #     # Only show XML & PDF options
-  #     admin.download_links = [:xml, :pdf]
+      admin.download_links = [:csv]
   #
   #     # Enable/disable the links based on block
   #     #   (for example, with cancan)
   #     admin.download_links = proc { can?(:view_download_links) }
   #
-  #   end
+    end
 
   # == Pagination
   #
@@ -297,4 +297,12 @@ ActiveAdmin.setup do |config|
   # You can inherit it with own class and inject it for all resources
   #
   # config.order_clause = MyOrderClause
+
+
+end
+
+# == Helper
+#
+module ActiveAdmin::ViewHelpers
+  include ApplicationHelper
 end

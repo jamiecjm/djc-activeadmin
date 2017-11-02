@@ -19,18 +19,8 @@ ActiveAdmin.register Project do
 	index do
 		column :id
 		column :name
-		1.times do
-			max_comm = projects.map(&:commissions).map(&:length).max
-			(1..max_comm).each do |x|
-				column "Commission #{x} (Effective Date)" do |project|
-					comm = project.commissions[x-1]
-					if comm
-						"#{comm.percentage}% (#{comm.effective_date})"
-					else
-						'-'
-					end
-				end
-			end
+		list_column 'Commissions (Date: Percentage(%))' do |p|
+			p.commissions.pluck(:effective_date,:percentage).to_h
 		end
 		actions
   end
@@ -45,6 +35,8 @@ ActiveAdmin.register Project do
     end
     actions
   end
+
+  filter :name, label: 'Project Name'
 
 end
 

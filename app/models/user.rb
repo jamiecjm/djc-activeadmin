@@ -64,41 +64,12 @@ class User < ApplicationRecord
   enum location: ["KL","JB","Penang","Melaka"]
   enum position: ["REN","Team Leader","Team Manager","admin"]
 
-  
-  def active_sv
-    Sale.where.not(status: 'Canceled').joins(:salevalues).where("salevalues.user_id = #{self.id}")
-  end
-
-  def TotalNetValue
-    self.active_sv.sum(:nett_value)
-  end
-
-  def TotalComm
-    self.active_sv.sum(:comm)
-  end
-
-  def TotalSPA
-    self.active_sv.sum(:spa)
-  end
-
-  def TotalSales
-    self.sales.not_canceled.count
-  end
-
   def leader
     self.team.leader
   end
 
   def leader?
     Team.all.pluck(:leader_id).include?(self.id)
-  end
-
-  def sub_tree_sales
-    Sale.joins(:users).where("users.id" => self.subtree)
-  end
-
-  def sub_tree_salevalues
-    Salevalue.joins(:user).where("users.id" => self.subtree)
   end
 
   def login=(login)

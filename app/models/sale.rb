@@ -32,6 +32,8 @@
 
 class Sale < ApplicationRecord
 
+  scope :not_canceled, -> {where.not(status: "Canceled")}
+
   has_many :users, :through => :salevalues
   belongs_to :project, optional: true
   belongs_to :commission, optional: true
@@ -53,48 +55,38 @@ class Sale < ApplicationRecord
 
   enum status: ["Booked","Done","Canceled"]
 
-  def self.not_canceled
-    self.where.not(status: "Canceled")
-  end
-
   def self.TotalNetValue
-    self.where(status: ["Done","Booked"]).joins(:unit).sum(:nett_price)
+    self.not_canceled.to_a.pluck(:nett_price).inject(:+)
   end
 
   def self.TotalComm
-    self.where(status: ["Done","Booked"]).joins(:unit).sum("units.comm")
+    self.not_canceled.to_a.pluck(:comm).inject(:+)
   end
 
   def self.TotalSPA
-    self.where(status: ["Done","Booked"]).joins(:unit).sum(:spa_price)
+    self.not_canceled.to_a.pluck(:spa_price).inject(:+)
   end
 
   def self.TotalSales
-    self.where(status: ["Done","Booked"]).count
+    self.not_canceled.to_a.length
   end
 
   def calculate
-    comm = self.commission
-    unit = self.unit
-    unit.update(sale_id: self.id,project_id: self.project_id,comm: comm.percentage/100*unit.nett_price*0.94,comm_percentage: comm.percentage)
-    self.salevalues.each do |sv|
-      sv.recalculate(unit)
-      # sv.user.recalculate
-    end
+    comm = commission
+    update(comm: comm.percentage/100*nett_price*0.94,comm_percentage: comm.percentage)
+    salevalues.map(&:recalculate)
   end
 
   def after_save_action
-    self.update(buyer: self.buyer.titleize,unit_id: unit.id)
+    update(buyer: self.buyer.titleize)
     User.merge
-    self.calculate
+    calculate
   end
 
   def set_commission_id
-    commission = self.project.commission(self.date)
+    commission = project.commission(self.date)
     if commission.present?
       self.commission_id = commission.id
-    else
-      self.commission_id = nil
     end
   end
 

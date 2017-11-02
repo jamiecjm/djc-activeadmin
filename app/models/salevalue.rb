@@ -51,8 +51,8 @@ class Salevalue < ApplicationRecord
 		self.active_sv.count
 	end
 
-	def recalculate(unit)
-		self.update(spa:unit.spa_price*self.percentage/100, nett_value:unit.nett_price*self.percentage/100, comm:unit.comm*self.percentage/100)
+	def recalculate
+		self.update(spa:sale.spa_price*self.percentage/100, nett_value:sale.nett_price*self.percentage/100, comm:sale.comm*self.percentage/100)
 	end
 
 end
