@@ -4,6 +4,8 @@ class Ability
   def initialize(user)
     user || User.new
     can :read, ActiveAdmin::Page, name: "Dashboard"
+    can :read, ActiveAdmin::Page, name: "Monthly Sales Figure"
+    can :read, ActiveAdmin::Page, name: "Team Sales Figure"
     can :create, Sale
     can :read, Salevalue, user_id: user
     can [:create,:update,:delete], Salevalue

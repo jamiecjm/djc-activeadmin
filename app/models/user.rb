@@ -69,7 +69,11 @@ class User < ApplicationRecord
   end
 
   def leader?
-    Team.all.pluck(:leader_id).include?(self.id)
+    if Team.find_by(leader_id: id)
+      true
+    else
+      false
+    end
   end
 
   def login=(login)
@@ -90,11 +94,16 @@ class User < ApplicationRecord
   end
 
   def team_members
-    if self.leader?
-      User.where(team_id: self.team.subtree.pluck(:id))
+    if leader?
+      User.where(team_id: team.subtree)
     else
-      User.where(id: self.subtree.pluck(:id))
+      User.where(id: subtree)
     end
+  end
+
+  def team_members_sales
+    Sale.not_canceled.joins(:users).where('users.id': team_members)
+    # team_members.map(&:sales).map(&:not_canceled)
   end
 
   private

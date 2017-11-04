@@ -23,6 +23,7 @@ controller do
 		scoped = super.includes(:project,:unit,:commission,:teams,:users, :salevalues2, salevalues: :user)
 	end
 
+
 end
 
 index title: 'Team Sales' do
