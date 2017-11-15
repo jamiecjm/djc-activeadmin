@@ -29,6 +29,10 @@ class Salevalue < ApplicationRecord
 	has_one :project, through: :sale
 	has_one :unit, through: :sale
 
+	validates :user_id, presence: true, unless: proc { other_user.present? }
+	validates :percentage, presence: true
+	validates :other_user, presence: true, unless: proc { user_id.present? }
+
 	accepts_nested_attributes_for :user, :allow_destroy => true, reject_if: proc { |attributes| attributes['prefered_name'].blank?}
 
 	def self.active_sv

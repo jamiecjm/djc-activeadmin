@@ -37,7 +37,6 @@ ActiveAdmin.register_page "Team Sales Figure" do
         remaining.times do 
           @sales << ['',0]
         end
-        byebug
       end
 
       respond_to do |format|

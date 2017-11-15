@@ -3,9 +3,9 @@
 # Table name: sales
 #
 #  id              :integer          not null, primary key
-#  date            :date
+#  date            :date             not null
 #  buyer           :string
-#  project_id      :integer
+#  project_id      :integer          not null
 #  unit_id         :integer
 #  status          :integer          default("Booked")
 #  package         :string
@@ -17,8 +17,8 @@
 #  commission_id   :integer
 #  unit_no         :string
 #  size            :integer
-#  nett_price      :float
-#  spa_price       :float
+#  nett_price      :integer          not null
+#  spa_price       :integer          not null
 #  comm            :float
 #  comm_percentage :float
 #

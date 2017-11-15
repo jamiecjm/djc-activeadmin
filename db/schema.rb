@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170910111407) do
+ActiveRecord::Schema.define(version: 20171114100951) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -45,9 +45,9 @@ ActiveRecord::Schema.define(version: 20170910111407) do
   end
 
   create_table "sales", force: :cascade do |t|
-    t.date     "date"
+    t.date     "date",                        null: false
     t.string   "buyer"
-    t.integer  "project_id"
+    t.integer  "project_id",                  null: false
     t.integer  "unit_id"
     t.integer  "status",          default: 0
     t.string   "package"
@@ -59,8 +59,8 @@ ActiveRecord::Schema.define(version: 20170910111407) do
     t.integer  "commission_id"
     t.string   "unit_no"
     t.integer  "size"
-    t.float    "nett_price"
-    t.float    "spa_price"
+    t.integer  "nett_price",                  null: false
+    t.integer  "spa_price",                   null: false
     t.float    "comm"
     t.float    "comm_percentage"
     t.index ["commission_id"], name: "index_sales_on_commission_id", using: :btree

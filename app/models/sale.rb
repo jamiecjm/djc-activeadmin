@@ -3,9 +3,9 @@
 # Table name: sales
 #
 #  id              :integer          not null, primary key
-#  date            :date
+#  date            :date             not null
 #  buyer           :string
-#  project_id      :integer
+#  project_id      :integer          not null
 #  unit_id         :integer
 #  status          :integer          default("Booked")
 #  package         :string
@@ -17,8 +17,8 @@
 #  commission_id   :integer
 #  unit_no         :string
 #  size            :integer
-#  nett_price      :float
-#  spa_price       :float
+#  nett_price      :integer          not null
+#  spa_price       :integer          not null
 #  comm            :float
 #  comm_percentage :float
 #
@@ -43,11 +43,14 @@ class Sale < ApplicationRecord
   has_many :salevalues2, -> {other_team}, class_name: "Salevalue", :dependent => :destroy
 
   after_create :after_save_action, :unless => :skip_callback
-  before_validation :set_commission_id, :unless => :skip_callback
+  before_create :set_commission_id, :unless => :skip_callback
 
   attr_accessor :skip_callback
 
-  validates :commission_id, presence: {message: "is not available for that date. Check with your leader for more details."}
+  validates :date, :presence => true
+  validates :project_id, :presence => true
+  validates :spa_price, :presence => true
+  validates :nett_price, :presence => true
 
   accepts_nested_attributes_for :salevalues, :allow_destroy => true, reject_if: proc { |attributes| attributes['user_id'].blank? ||  attributes['percentage'].blank?}
   accepts_nested_attributes_for :salevalues2, :allow_destroy => true, reject_if: proc { |attributes| attributes['percentage'].blank?}
@@ -56,20 +59,22 @@ class Sale < ApplicationRecord
   enum status: ["Booked","Done","Canceled"]
 
   def self.TotalNetValue
-    self.not_canceled.to_a.pluck(:nett_price).inject(:+)
+    self.pluck(:nett_price).inject(:+)
   end
 
   def self.TotalComm
-    self.not_canceled.to_a.pluck(:comm).inject(:+)
+    self.pluck(:comm).inject(:+)
   end
 
   def self.TotalSPA
-    self.not_canceled.to_a.pluck(:spa_price).inject(:+)
+    self.pluck(:spa_price).inject(:+)
   end
 
   def self.TotalSales
-    self.not_canceled.to_a.length
+    self.length
   end
+
+  private
 
   def calculate
     comm = commission
@@ -89,7 +94,6 @@ class Sale < ApplicationRecord
       self.commission_id = commission.id
     end
   end
-
 
 
 end

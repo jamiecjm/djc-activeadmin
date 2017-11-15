@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
     devise_parameter_sanitizer.permit(:sign_up, keys: [:email, :name, :prefered_name, :phone_no, :birthday, :parent_id, :location])
   end
 
-  def access_denied(exception)
+  def access_denied(exception=nil)
     redirect_to root_path, alert: 'Access Denied'
   end
 end

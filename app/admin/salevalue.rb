@@ -16,7 +16,7 @@ ActiveAdmin.register Salevalue do
 
 	index title: 'Individual Sales' do
 	    selectable_column
-	    column :sale_id
+	    column 'Sale ID', :sale_id
 	    column :date, sortable: 'sales.date' do |sv|
 	    	sv.sale.date
 	    end
@@ -53,11 +53,35 @@ ActiveAdmin.register Salevalue do
 	    column 'Unit Nett Value (RM)', sortable: 'sales.nett_price' do |sv|
 	    	number_with_delimiter('%.2f' % sv.sale.nett_price)
 	    end
+
+	    actions do |sv|
+	    	link_to 'View', sale_path(sv.sale)
+	    end
 	end
 
 	controller do
 		def scoped_collection
 			super.includes(:project,:unit)
+		end
+
+		def new
+			redirect_to 'salevalues' if !current_user.admin?
+		end
+
+		def create
+			redirect_to 'salevalues' if !current_user.admin?
+		end
+
+		def edit
+			redirect_to 'salevalues' if !current_user.admin?
+		end
+
+		def destroy
+			redirect_to 'salevalues' if !current_user.admin?
+		end
+
+		def show
+			redirect_to 'salevalues' if !current_user.admin?
 		end
 
 	end
@@ -98,8 +122,18 @@ ActiveAdmin.register Salevalue do
 		end
 	end
 
-	filter :user, label: 'REN', :collection => proc {current_user.team_members.order('prefered_name').map{|u| [u.prefered_name, u.id]}}
+	filter :sales_date, as: :date_range
 	filter :project, :collection => Project.all.order('name')
+
+	batch_action :change_status_of, form: {
+		status: %w[Done Booked Canceled]
+	}, confirm: 'Choose Status' do |ids, inputs|
+		batch_action_collection.find(ids).each do |sv|
+	      sv.sale.update(status: Sale.statuses[inputs['status']])
+	    end
+
+	    redirect_back fallback_location: collection_path, notice: "Sales have been maked as #{inputs['status']}"
+	end
 
 end
 
