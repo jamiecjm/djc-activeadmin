@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171114100951) do
+ActiveRecord::Schema.define(version: 20171118041347) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -131,6 +131,7 @@ ActiveRecord::Schema.define(version: 20171114100951) do
     t.datetime "created_at",                             null: false
     t.datetime "updated_at",                             null: false
     t.boolean  "admin",                  default: false
+    t.boolean  "leader?",                default: false
     t.index ["ancestry"], name: "index_users_on_ancestry", using: :btree
     t.index ["email"], name: "index_users_on_email", unique: true, using: :btree
     t.index ["prefered_name"], name: "index_users_on_prefered_name", using: :btree

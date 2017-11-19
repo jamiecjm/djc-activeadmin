@@ -1,0 +1,5 @@
+ActiveAdmin.modal_dialog("Send email to: ", 
+	{email: 'text'}, 
+	function(inputs) {
+		$.redirectPost('<%= j email_report_sale_path(@id)%>', {email: inputs.email});
+	})

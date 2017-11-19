@@ -32,8 +32,8 @@
 
 class Sale < ApplicationRecord
 
-  scope :not_canceled, -> {where.not(status: "Canceled")}
-
+  scope :not_cancelled, -> {where.not(status: "Cancelled")}
+  
   has_many :users, :through => :salevalues
   belongs_to :project, optional: true
   belongs_to :commission, optional: true
@@ -56,7 +56,7 @@ class Sale < ApplicationRecord
   accepts_nested_attributes_for :salevalues2, :allow_destroy => true, reject_if: proc { |attributes| attributes['percentage'].blank?}
   accepts_nested_attributes_for :unit
 
-  enum status: ["Booked","Done","Canceled"]
+  enum status: ["Booked","Done","Cancelled"]
 
   def self.TotalNetValue
     self.pluck(:nett_price).inject(:+)
@@ -74,9 +74,13 @@ class Sale < ApplicationRecord
     self.length
   end
 
+  def self.ransackable_scopes(_auth_object = nil)
+    [:by_team]
+  end
+
   private
 
-  def calculate
+  def calculate_comm
     comm = commission
     update(comm: comm.percentage/100*nett_price*0.94,comm_percentage: comm.percentage)
     salevalues.map(&:recalculate)
@@ -85,7 +89,7 @@ class Sale < ApplicationRecord
   def after_save_action
     update(buyer: self.buyer.titleize)
     User.merge
-    calculate
+    calculate_comm
   end
 
   def set_commission_id

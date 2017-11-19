@@ -18,20 +18,24 @@ ActiveAdmin.register Sale do
 								:package, :remark, salevalues_attributes: [:id, :user_id, :percentage, :comm, :nett_value, :spa, :_destroy],
 								salevalues2_attributes: [:id, :other_user, :percentage, :comm, :nett_value, :spa, :_destroy]
 
-	scope :not_canceled, default: true do |sales|
-		if params['q']
-			from = params["q"]['date_gteq']
-			to = params['q']['date_lteq']
-		end
-		
-		from ||= ApplicationHelper.current_sales_cycle[:startdate]
-		to ||= Date.today
-		sales.not_canceled.where('date >= ?', from).where('date <= ?', to)
-	end
+	scope :not_cancelled, default: true 
 
 	scope :all
 
-	includes :project, :commission, :salevalues2, :users
+	before_action only: :index do
+		if params['q']
+			params['q']['date_gteq'] ||= ApplicationHelper.current_sales_cycle[:startdate]
+			params['q']['date_lteq'] ||= ApplicationHelper.current_sales_cycle[:enddate]
+		else
+			params['q'] = {}
+			params['q']['date_gteq'] ||= ApplicationHelper.current_sales_cycle[:startdate]
+			params['q']['date_lteq'] ||= ApplicationHelper.current_sales_cycle[:enddate]
+		end
+	end
+
+	skip_before_action :verify_authenticity_token, only: :email_report
+
+	includes :project, :commission
 
 	index title: 'Team Sales' do
 		selectable_column
@@ -148,39 +152,18 @@ ActiveAdmin.register Sale do
 
 
 	filter :date
-	filter :users, label: 'REN', :collection => proc {User.order('prefered_name').map{|u| [u.prefered_name, u.id]}}, as: :select, input_html: {multiple: true}
+	filter :status, as: :select, :collection => Sale.statuses
 	filter :project, :collection => Project.all.order('name'), as: :select
 	filter :unit_no
+	filter :buyer
+	filter :users, label: 'REN', :collection => proc {User.order('prefered_name')}, as: :select, input_html: {multiple: true}
+	filter :unit_size
+	filter :spa_price
+	filter :nett_price
+	filter :comm
+
 
 	sidebar :summary, priority: 0, only: :index do
-		columns do
-			column do
-				span 'Start Date'
-			end
-			column do
-				if params['q']
-					from = params["q"]['date_gteq']
-				end
-				
-				from ||= ApplicationHelper.current_sales_cycle[:startdate]
-			
-				span from
-			end
-		end
-		columns do
-			column do
-				span 'End Date'
-			end
-			column do
-				if params['q']
-					to = params["q"]['date_lteq']
-				end
-				
-				to ||= Date.today
-			
-				span to
-			end
-		end
 		columns do
 			column do
 				span 'Total SPA Value'
@@ -218,7 +201,7 @@ ActiveAdmin.register Sale do
 	batch_action :destroy, false
 
 	batch_action :change_status_of, form: {
-		status: %w[Done Booked Canceled]
+		status: %w[Done Booked cancelled]
 	}, confirm: 'Choose Status' do |ids, inputs|
 		batch_action_collection.find(ids).each do |sale|
 	      sale.update(status: Sale.statuses[inputs['status']])
@@ -226,6 +209,22 @@ ActiveAdmin.register Sale do
 
 	    redirect_back fallback_location: collection_path, notice: "Sales have been maked as #{inputs['status']}"
 	end
+
+	member_action :email_report_popup do
+		@id = resource.id
+		respond_to do |format|
+			format.js
+		end
+	end
+
+	member_action :email_report, method: :post do
+		redirect_back fallback_location: resource_path(params[:id]), notice: 'Email has been sent successfully'
+	end
+
+	action_item :email_report_popup, only: :show, class: 'email_report_popup' do
+		link_to 'Email Report', email_report_popup_sale_path, remote: true
+	end
+
 
 end
 

@@ -25,6 +25,7 @@
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
 #  admin                  :boolean          default(FALSE)
+#  leader?                :boolean          default(FALSE)
 #
 # Indexes
 #
@@ -46,11 +47,12 @@ class User < ApplicationRecord
 
   scope :with_team, -> {where.not(team_id: nil).order('prefered_name')}
   scope :approved, -> {where(approved?: true).order('prefered_name')}
+  scope :awaiting_approval, -> {where(approved?: false).order('prefered_name')}
 
   has_many :sales, :through => :salevalues
   has_many :salevalues, dependent: :destroy
   belongs_to :team, optional: true
-  # has_one :leader, class_name: 'User', through: :team
+  has_one :leader, through: :team
 
   has_ancestry :orphan_strategy => :rootify
 
@@ -64,11 +66,15 @@ class User < ApplicationRecord
   enum location: ["KL","JB","Penang","Melaka"]
   enum position: ["REN","Team Leader","Team Manager","admin"]
 
-  def leader
-    self.team.leader
+  # def leader
+  #   self.team.leader
+  # end
+
+  def display_name
+    prefered_name
   end
 
-  def leader?
+  def is_leader?
     if Team.find_by(leader_id: id)
       true
     else
@@ -102,8 +108,8 @@ class User < ApplicationRecord
   end
 
   def team_members_sales
-    Sale.not_canceled.joins(:users).where('users.id': team_members)
-    # team_members.map(&:sales).map(&:not_canceled)
+    Sale.not_cancelled.joins(:users).where('users.id': team_members)
+    # team_members.map(&:sales).map(&:not_cancelled)
   end
 
   private
@@ -130,6 +136,14 @@ class User < ApplicationRecord
     if self.parent.present? && !self.leader?
       self.team_id = self.parent.team_id 
     end
+  end
+
+  def recalculate
+    self.total_spa = u.salevalues.not_cancelled.sum(:spa)
+    self.total_nett_value = u.salevalues.not_cancelled.sum(:nett_value)
+    self.total_comm = u.salevalues.not_cancelled.sum(:comm)
+    self.total_sales = u.salevalues.not_cancelled.length
+    self.save
   end
 
 

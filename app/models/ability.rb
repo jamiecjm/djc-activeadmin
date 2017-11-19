@@ -7,7 +7,6 @@ class Ability
     can :read, ActiveAdmin::Page, name: "Monthly Sales Figure"
     can :read, ActiveAdmin::Page, name: "Team Sales Figure"
     can :create, Sale
-    can :read, Salevalue, user_id: user
     can [:create,:update,:delete], Salevalue
     can [:read,:update], user
     if user.admin?
@@ -15,10 +14,12 @@ class Ability
     elsif user.leader?
       can :manage, User, team_id: user.team.subtree.pluck(:id)
       can :manage, Sale, teams: {id: user.team.subtree.pluck(:id)}
+      can :read, Salevalue, team: {id: user.team.subtree.pluck(:id)}
       can :manage, Project
     else
-      can :read, User, id: user.subtree.pluck(:id)
+      can [:read, :update], User, id: user.subtree.pluck(:id)
       can :manage, Sale, users: {id: user.subtree.pluck(:id)}
+      can :read, Salevalue, user_id: user.subtree.pluck(:id)
     end
   end
 end

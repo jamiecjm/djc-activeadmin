@@ -14,9 +14,26 @@ ActiveAdmin.register Salevalue do
 
 	menu parent: 'Sale', label: 'Individual'
 
+	scope :not_cancelled, default: true
+	scope :all
+
+	before_filter only: :index do 
+		if params['q']
+			params['q']['user_id_eq'] ||= current_user.id
+			params['q']['sale_date_gteq_datetime'] ||= ApplicationHelper.current_sales_cycle[:startdate]
+			params['q']['sale_date_lteq_datetime'] ||= ApplicationHelper.current_sales_cycle[:enddate]
+		else
+			params['q'] = {}
+			params['q']['user_id_eq'] = current_user.id
+			params['q']['sale_date_gteq_datetime'] ||= ApplicationHelper.current_sales_cycle[:startdate]
+			params['q']['sale_date_lteq_datetime'] ||= ApplicationHelper.current_sales_cycle[:enddate]
+		end
+	end
+
+
 	index title: 'Individual Sales' do
 	    selectable_column
-	    column 'Sale ID', :sale_id
+	    column :sale
 	    column :date, sortable: 'sales.date' do |sv|
 	    	sv.sale.date
 	    end
@@ -93,7 +110,7 @@ ActiveAdmin.register Salevalue do
 				span 'Total SPA Value'
 			end
 			column do
-				span number_to_currency(salevalues.pluck(:spa).inject(:+), unit: 'RM ', delimeter: ',')
+				span number_to_currency(salevalues.per(salevalues.length * salevalues.total_pages).TotalSPA, unit: 'RM ', delimeter: ',')
 			end
 		end
 		columns do
@@ -101,7 +118,7 @@ ActiveAdmin.register Salevalue do
 				span 'Total Nett Value'
 			end
 			column do
-				span number_to_currency(salevalues.pluck(:nett_value).inject(:+), unit: 'RM ', delimeter: ',')
+				span number_to_currency(salevalues.per(salevalues.length * salevalues.total_pages).TotalNetValue, unit: 'RM ', delimeter: ',')
 			end
 		end
 		columns do
@@ -109,7 +126,7 @@ ActiveAdmin.register Salevalue do
 				span 'Total Commision'
 			end
 			column do
-				span number_to_currency(salevalues.pluck(:comm).inject(:+), unit: 'RM ', delimeter: ',')
+				span number_to_currency(salevalues.per(salevalues.length * salevalues.total_pages).TotalComm, unit: 'RM ', delimeter: ',')
 			end
 		end	
 		columns do
@@ -117,18 +134,19 @@ ActiveAdmin.register Salevalue do
 				span 'Total Sales'
 			end
 			column do
-				span salevalues.length
+				span salevalues.per(salevalues.length * salevalues.total_pages).length
 			end
 		end
 	end
 
-	filter :sales_date, as: :date_range
+	filter :sale_date, as: :date_range
+	filter :user, label: 'REN', as: :select, :collection => proc {current_user.team_members}
 	filter :project, :collection => Project.all.order('name')
 
 	batch_action :change_status_of, form: {
-		status: %w[Done Booked Canceled]
+		status: %w[Done Booked cancelled]
 	}, confirm: 'Choose Status' do |ids, inputs|
-		batch_action_collection.find(ids).each do |sv|
+		Salevalue.find(ids).each do |sv|
 	      sv.sale.update(status: Sale.statuses[inputs['status']])
 	    end
 

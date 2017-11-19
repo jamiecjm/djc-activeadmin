@@ -25,6 +25,7 @@
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
 #  admin                  :boolean          default(FALSE)
+#  leader?                :boolean          default(FALSE)
 #
 # Indexes
 #

@@ -28,10 +28,14 @@ form input[type=date]{
     max-width: 200px;
 }
 
-.salevalues .edit_link {
+.salevalues .member_link{
 	display: none;
 }
 
 .select2-search__field {
 	border: none !important;
+}
+
+.col-date {
+	white-space: nowrap;
 }

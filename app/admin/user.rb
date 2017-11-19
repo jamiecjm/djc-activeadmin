@@ -5,29 +5,78 @@ ActiveAdmin.register User do
   permit_params :email, :password, :password_confirmation, :name, :prefered_name, :phone_no, :birthday, :parent_id,
                 :location
 
+  scope :approved, default: true
+
+  scope :awaiting_approval, if: proc {current_user.leader?} 
+
+  scope :sales do |users|
+    users.joins(salevalues: :sale).where('sales.status != ?', 2).group('users.id').select('SUM(salevalues.nett_value) as total_nett_value', User.attribute_names)
+  end 
+
+  before_action only: :index do
+    if params['scope'] == 'sales'
+      params['order'] = 'total_nett_value_desc'
+    else
+      if params['order'] == 'total_nett_value_desc'
+        params['order'] = 'id_desc'
+      end
+    end
+  end  
+
   index title: 'Members' do
-    selectable_column
-    id_column
-    column 'Full Name', :name
-    column :prefered_name
-    column 'Referrer' do |user|
-      user.parent&.prefered_name
+    if params['scope'] != 'sales'
+      selectable_column
+      id_column
+      column :prefered_name
+      column 'Full Name', :name
+      column 'Referrer' do |user|
+        user.parent&.prefered_name
+      end
+      column 'Leader' do |user|
+        user.team.leader.prefered_name
+      end
+      column :location
+      column :phone_no
+      column :email
+      column :birthday
+      column :created_at
+      actions
+    else
+      id_column
+      column :prefered_name, sortable: nil
+      column 'Referrer' do |user|
+        user.parent&.prefered_name
+      end
+      column 'Leader' do |user|
+        user.team.leader.prefered_name
+      end
+      column :location, sortable: nil
+      column 'Total SPA (RM)' do |user|
+        number_to_currency(user.salevalues.not_cancelled.TotalSPA, unit: '')
+      end
+      column 'Total Nett Value (RM)' do |user|
+        number_to_currency(user.salevalues.not_cancelled.TotalNetValue, unit: '')
+      end
+      column 'Total Comm (RM)' do |user|
+        number_to_currency(user.salevalues.not_cancelled.TotalComm, unit: '')
+      end
+      column 'Total Sales' do |user|
+        user.salevalues.not_cancelled.length
+      end
     end
-    column 'Leader' do |user|
-      user.team.leader.prefered_name
-    end
-    column :location
-    column :phone_no
-    column :email
-    column :birthday
-    column :created_at
-    actions
   end
 
-  filter :email
-  filter :current_sign_in_at
-  filter :sign_in_count
-  filter :created_at
+  
+  filter :name, label: 'Full Name', as: :select
+  filter :prefered_name, as: :select
+  filter :leader, collection: User.where(leader?: true)
+  filter :location
+  unless proc { params['scope'] == 'sales' }
+    filter :phone_no
+    filter :email
+    filter :birthday
+    filter :created_at
+  end
 
   form do |f|
     f.inputs do
@@ -42,6 +91,27 @@ ActiveAdmin.register User do
       f.input :password_confirmation
     end
     f.actions
+  end
+
+  batch_action :approve, confirm: 'Approve the selected REN?' do |ids|
+    User.where(id: ids).update_all(approved?: true)
+    redirect_back fallback_location: collection_path, notice: 'Selected RENs have been approved.'
+  end
+
+  batch_action :unapprove, confirm: 'Approve the selected REN?' do |ids|
+    User.where(id: ids).update_all(approved?: false)
+    redirect_back fallback_location: collection_path, alert: 'Selected RENs have been unapproved.'
+  end 
+
+  sidebar 'Extra Filter', if: proc { params['scope'] == 'sales' } do
+    form action: :extra_filter, method: :post do
+      fields :extra_q do 
+        label 'Date Range'
+        input name: :from, type: :date, value: params['extra_q']['from']
+        input name: :to, type: :date, value: params['extra_q']['to']
+      end
+      
+    end 
   end
 
 
