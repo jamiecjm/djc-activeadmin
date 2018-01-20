@@ -17,6 +17,8 @@ ActiveAdmin.register Salevalue do
 	scope :not_cancelled, default: true
 	scope :all
 
+	actions :all, except: [:new, :show, :edit, :delete]
+
 	before_filter only: :index do 
 		if params['q']
 			params['q']['user_id_eq'] ||= current_user.id
@@ -33,7 +35,7 @@ ActiveAdmin.register Salevalue do
 
 	index title: 'Individual Sales' do
 	    selectable_column
-	    column :sale
+	    column :sale, sortable: :sales
 	    column :date, sortable: 'sales.date' do |sv|
 	    	sv.sale.date
 	    end
@@ -49,7 +51,7 @@ ActiveAdmin.register Salevalue do
 	    column :buyer, sortable: 'sales.buyer' do |sv|
 	    	sv.sale.buyer
 	    end
-	    column 'REN SalePercentage (%)',sortable: :percentage do |sv|
+	    column 'REN Sale Percentage (%)',sortable: :percentage do |sv|
 	    	number_with_delimiter('%.2f' % sv.percentage)
 	    end
 	    column 'REN SPA Value (RM)',sortable: :spa do |sv|
@@ -74,33 +76,6 @@ ActiveAdmin.register Salevalue do
 	    actions do |sv|
 	    	link_to 'View', sale_path(sv.sale)
 	    end
-	end
-
-	controller do
-		def scoped_collection
-			super.includes(:project,:unit)
-		end
-
-		def new
-			redirect_to 'salevalues' if !current_user.admin?
-		end
-
-		def create
-			redirect_to 'salevalues' if !current_user.admin?
-		end
-
-		def edit
-			redirect_to 'salevalues' if !current_user.admin?
-		end
-
-		def destroy
-			redirect_to 'salevalues' if !current_user.admin?
-		end
-
-		def show
-			redirect_to 'salevalues' if !current_user.admin?
-		end
-
 	end
 
 	sidebar :summary, priority: 0, only: :index do
@@ -139,9 +114,20 @@ ActiveAdmin.register Salevalue do
 		end
 	end
 
-	filter :sale_date, as: :date_range
 	filter :user, label: 'REN', as: :select, :collection => proc {current_user.team_members}
-	filter :project, :collection => Project.all.order('name')
+	filter :sale
+	filter :sale_date, as: :date_range
+	filter :sale_status, as: :select, collection: Sale.statuses
+	filter :project, :collection => proc{ Project.all.order('name') }
+	filter :sale_unit_no, as: :string, label: 'Unit No'
+	filter :sale_buyer, as: :string, label: 'Buyer Name'
+	filter :percentage, label: 'REN Sale Percentage'
+	filter :spa, label: 'REN SPA Value'
+	filter :nett_value, label: 'REN Nett Value'
+	filter :comm, label: 'Unit Comm'
+	filter :sale_unit_size, as: :numeric, label: 'Unit Size'
+	filter :sale_spa_price, as: :numeric, label: 'Unit SPA Value'
+	filter :sale_nett_price, as: :numeric, label: 'Unit Nett Value'
 
 	batch_action :change_status_of, form: {
 		status: %w[Done Booked cancelled]

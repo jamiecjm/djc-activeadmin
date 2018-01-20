@@ -37,6 +37,12 @@ ActiveAdmin.register Sale do
 
 	includes :project, :commission
 
+	controller do
+	  def apply_filtering(chain)
+	      super(chain).distinct
+	  end
+	end
+
 	index title: 'Team Sales' do
 		selectable_column
 		column :id
@@ -82,6 +88,7 @@ ActiveAdmin.register Sale do
 
 	form do |f|
 		f.inputs do
+			f.semantic_errors *f.object.errors.keys
 			
 			input :date
 			f.has_many :salevalues, heading: 'REN', :allow_destroy => true, :new_record => 'Add REN' do |sv|
@@ -150,18 +157,17 @@ ActiveAdmin.register Sale do
 
 	end
 
-
+	filter :by_team, as: :select, label: 'View as',:collection => proc { User.order('prefered_name').map { |u| [u.prefered_name, "[#{u.id}]"] } }
 	filter :date
 	filter :status, as: :select, :collection => Sale.statuses
-	filter :project, :collection => Project.all.order('name'), as: :select
+	filter :project, as: :select, :collection => proc{ Project.all.order('name') }
 	filter :unit_no
 	filter :buyer
 	filter :users, label: 'REN', :collection => proc {User.order('prefered_name')}, as: :select, input_html: {multiple: true}
-	filter :unit_size
 	filter :spa_price
 	filter :nett_price
+	filter :commission_percentage, as: :numeric
 	filter :comm
-
 
 	sidebar :summary, priority: 0, only: :index do
 		columns do
@@ -203,7 +209,7 @@ ActiveAdmin.register Sale do
 	batch_action :change_status_of, form: {
 		status: %w[Done Booked cancelled]
 	}, confirm: 'Choose Status' do |ids, inputs|
-		batch_action_collection.find(ids).each do |sale|
+		Sale.find(ids).each do |sale|
 	      sale.update(status: Sale.statuses[inputs['status']])
 	    end
 

@@ -12,4 +12,12 @@ class ApplicationController < ActionController::Base
   def access_denied(exception=nil)
     redirect_to root_path, alert: 'Access Denied'
   end
+
+  def approved_user_only
+  	unless current_user&.approved?
+  		sign_out current_user 
+  		redirect_to new_user_session_path, alert: 'Access Denied'
+  	end
+  end
+
 end

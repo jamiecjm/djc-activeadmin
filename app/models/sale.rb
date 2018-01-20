@@ -34,11 +34,14 @@ class Sale < ApplicationRecord
 
   scope :not_cancelled, -> {where.not(status: "Cancelled")}
   
-  has_many :users, :through => :salevalues
+  scope :by_team, -> (id) { search(users_id_in: User.find(id[/\d+/].to_i).team_members.pluck(:id)).result }
+  
+  has_many :users, -> {distinct}, :through => :salevalues
   belongs_to :project, optional: true
   belongs_to :commission, optional: true
   belongs_to :unit, optional:true, :dependent => :destroy
-  has_many :teams, through: :users
+  has_many :teams, -> {distinct}, through: :users
+  has_many :leaders, -> {distinct}, through: :users
   has_many :salevalues, -> {team}, :dependent => :destroy
   has_many :salevalues2, -> {other_team}, class_name: "Salevalue", :dependent => :destroy
 
@@ -51,6 +54,7 @@ class Sale < ApplicationRecord
   validates :project_id, :presence => true
   validates :spa_price, :presence => true
   validates :nett_price, :presence => true
+  validates :salevalues, presence: { message: "(REN) can't be blank" }
 
   accepts_nested_attributes_for :salevalues, :allow_destroy => true, reject_if: proc { |attributes| attributes['user_id'].blank? ||  attributes['percentage'].blank?}
   accepts_nested_attributes_for :salevalues2, :allow_destroy => true, reject_if: proc { |attributes| attributes['percentage'].blank?}
@@ -58,16 +62,24 @@ class Sale < ApplicationRecord
 
   enum status: ["Booked","Done","Cancelled"]
 
+  def display_name
+    "Sale ##{id}"
+  end
+
+  def self.ransackable_scopes(_auth_object = nil)
+    [:by_team, :not_cancelled]
+  end
+
   def self.TotalNetValue
-    self.pluck(:nett_price).inject(:+)
+    self.all.to_a.pluck(:nett_price).inject(:+)
   end
 
   def self.TotalComm
-    self.pluck(:comm).inject(:+)
+    self.all.to_a.pluck(:comm).inject(:+)
   end
 
   def self.TotalSPA
-    self.pluck(:spa_price).inject(:+)
+    self.all.to_a.pluck(:spa_price).inject(:+)
   end
 
   def self.TotalSales

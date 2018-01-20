@@ -8,7 +8,12 @@ class Ability
     can :read, ActiveAdmin::Page, name: "Team Sales Figure"
     can :create, Sale
     can [:create,:update,:delete], Salevalue
-    can [:read,:update], user
+    can [:read, :update], user
+
+    if user.new_record? || user.leader?
+      can :create, User
+    end
+
     if user.admin?
       can :manage, :all
     elsif user.leader?
@@ -17,7 +22,7 @@ class Ability
       can :read, Salevalue, team: {id: user.team.subtree.pluck(:id)}
       can :manage, Project
     else
-      can [:read, :update], User, id: user.subtree.pluck(:id)
+      can [:read], User, id: user.subtree.pluck(:id)
       can :manage, Sale, users: {id: user.subtree.pluck(:id)}
       can :read, Salevalue, user_id: user.subtree.pluck(:id)
     end

@@ -10,17 +10,34 @@ ActiveAdmin.register User do
   scope :awaiting_approval, if: proc {current_user.leader?} 
 
   scope :sales do |users|
-    users.joins(salevalues: :sale).where('sales.status != ?', 2).group('users.id').select('SUM(salevalues.nett_value) as total_nett_value', User.attribute_names)
+    users.joins(:sales).where('sales.status != ?', 2).group('users.id').select('SUM(salevalues.nett_value) as total_nett_value', User.attribute_names)
   end 
 
   before_action only: :index do
     if params['scope'] == 'sales'
       params['order'] = 'total_nett_value_desc'
+
+      if params['q']
+        params['q']['sales_date_gteq_datetime'] ||= ApplicationHelper.first_day_of_month(Date.today)
+        params['q']['sales_date_lteq_datetime'] ||= Date.today
+      else
+        params['q'] = {}
+        params['q']['sales_date_gteq_datetime'] ||= ApplicationHelper.first_day_of_month(Date.today)
+        params['q']['sales_date_lteq_datetime'] ||= Date.today
+      end
+
     else
       if params['order'] == 'total_nett_value_desc'
         params['order'] = 'id_desc'
       end
+
+      if params['q']
+        params['q']['sales_date_gteq_datetime'] = nil
+        params['q']['sales_date_lteq_datetime'] = nil
+      end
+
     end
+
   end  
 
   index title: 'Members' do
@@ -52,13 +69,13 @@ ActiveAdmin.register User do
       end
       column :location, sortable: nil
       column 'Total SPA (RM)' do |user|
-        number_to_currency(user.salevalues.not_cancelled.TotalSPA, unit: '')
+        number_to_currency(user.salevalues.not_cancelled.where("date >= ?", params['q']['sales_date_gteq_datetime']).where("date <= ?", params['q']['sales_date_lteq_datetime']).TotalSPA, unit: '')
       end
       column 'Total Nett Value (RM)' do |user|
-        number_to_currency(user.salevalues.not_cancelled.TotalNetValue, unit: '')
+        number_to_currency(user.salevalues.not_cancelled.where("date >= ?", params['q']['sales_date_gteq_datetime']).where("date <= ?", params['q']['sales_date_lteq_datetime']).TotalNetValue, unit: '')
       end
       column 'Total Comm (RM)' do |user|
-        number_to_currency(user.salevalues.not_cancelled.TotalComm, unit: '')
+        number_to_currency(user.salevalues.not_cancelled.where("date >= ?", params['q']['sales_date_gteq_datetime']).where("date <= ?", params['q']['sales_date_lteq_datetime']).TotalComm, unit: '')
       end
       column 'Total Sales' do |user|
         user.salevalues.not_cancelled.length
@@ -66,20 +83,22 @@ ActiveAdmin.register User do
     end
   end
 
-  
+  filter :sales_date, as: :date_range, if: proc { params['scope'] == 'sales' }
+
   filter :name, label: 'Full Name', as: :select
   filter :prefered_name, as: :select
-  filter :leader, collection: User.where(leader?: true)
-  filter :location
-  unless proc { params['scope'] == 'sales' }
-    filter :phone_no
-    filter :email
-    filter :birthday
-    filter :created_at
-  end
+  filter :leader, collection: proc{ User.where(leader?: true) }
+  filter :location, as: :select
+  
+  filter :phone_no, unless: proc { params['scope'] == 'sales' }
+  filter :email, unless: proc { params['scope'] == 'sales' }
+  filter :birthday, unless: proc { params['scope'] == 'sales' }
+  filter :created_at, unless: proc { params['scope'] == 'sales' }
+
 
   form do |f|
     f.inputs do
+      f.semantic_errors *f.object.errors.keys
       f.input :name
       f.input :prefered_name
       f.input :phone_no
@@ -102,17 +121,6 @@ ActiveAdmin.register User do
     User.where(id: ids).update_all(approved?: false)
     redirect_back fallback_location: collection_path, alert: 'Selected RENs have been unapproved.'
   end 
-
-  sidebar 'Extra Filter', if: proc { params['scope'] == 'sales' } do
-    form action: :extra_filter, method: :post do
-      fields :extra_q do 
-        label 'Date Range'
-        input name: :from, type: :date, value: params['extra_q']['from']
-        input name: :to, type: :date, value: params['extra_q']['to']
-      end
-      
-    end 
-  end
 
 
 end

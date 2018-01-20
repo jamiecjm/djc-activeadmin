@@ -27,6 +27,7 @@ ActiveAdmin.register Project do
 
   form do |f|
     f.inputs do
+      f.semantic_errors *f.object.errors.keys
       f.input :name
       f.has_many :commissions do |c|
         c.input :effective_date

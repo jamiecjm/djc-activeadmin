@@ -11,8 +11,8 @@
       f.input :phone_no
       f.input :email
       f.input :birthday
-      f.input :parent_id, label: 'Referrer', as: :select, :collection => User.approved.map {|u| [u.prefered_name,u.id]}
-      f.input :location
+      f.input :parent_id, label: 'Referrer', as: :select, :collection => User.approved.map {|u| [u.prefered_name,u.id]}, input_html: { class: 'select2' }
+      f.input :location, input_html: { class: 'select2' }
       f.input :password, label: t('active_admin.devise.password.title')
       f.input :password_confirmation, label: t('active_admin.devise.password_confirmation.title')
     end

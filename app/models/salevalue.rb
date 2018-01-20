@@ -39,15 +39,15 @@ class Salevalue < ApplicationRecord
 
 
 	def self.TotalNetValue
-		self.pluck(:nett_value).inject(:+)
+		self.all.to_a.pluck(:nett_value).inject(:+)
 	end
 
 	def self.TotalComm
-		self.pluck(:comm).inject(:+)
+		self.all.to_a.pluck(:comm).inject(:+)
 	end
 
 	def self.TotalSPA
-		self.pluck(:spa).inject(:+)
+		self.all.to_a.pluck(:spa).inject(:+)
 	end
 
 	def self.TotalSales
@@ -56,7 +56,6 @@ class Salevalue < ApplicationRecord
 
 	def recalculate
 		self.update(spa:sale.spa_price*self.percentage/100, nett_value:sale.nett_price*self.percentage/100, comm:sale.comm*self.percentage/100)
-		user.recalculate
 	end
 
 end

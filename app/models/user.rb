@@ -49,8 +49,8 @@ class User < ApplicationRecord
   scope :approved, -> {where(approved?: true).order('prefered_name')}
   scope :awaiting_approval, -> {where(approved?: false).order('prefered_name')}
 
-  has_many :sales, :through => :salevalues
   has_many :salevalues, dependent: :destroy
+  has_many :sales, :through => :salevalues
   belongs_to :team, optional: true
   has_one :leader, through: :team
 
@@ -138,13 +138,7 @@ class User < ApplicationRecord
     end
   end
 
-  def recalculate
-    self.total_spa = u.salevalues.not_cancelled.sum(:spa)
-    self.total_nett_value = u.salevalues.not_cancelled.sum(:nett_value)
-    self.total_comm = u.salevalues.not_cancelled.sum(:comm)
-    self.total_sales = u.salevalues.not_cancelled.length
-    self.save
-  end
+  
 
 
 end

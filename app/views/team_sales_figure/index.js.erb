@@ -1,1 +1,2 @@
-$('#team_sales_figure-chart').parent().html("<%= j render 'team_sales_figure/barchart', sales: @sales, startdate: params[:startdate], enddate: params[:enddate]%>")
+$('#team_sales_figure-chart').parent().html("<%= j render 'team_sales_figure/barchart', sales: @sales, startdate: @startdate, enddate: @enddate%>")
+$('form').find('*').attr('disabled', false)
